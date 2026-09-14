@@ -1,0 +1,642 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>RM Duty Builder - Royal Mail</title>
+<link rel="stylesheet" href="css/base.css">
+<link rel="stylesheet" href="css/duty-builder.css">
+<link rel="stylesheet" href="css/duty-sheet.css">
+<link rel="stylesheet" href="css/patterns.css">
+<link rel="stylesheet" href="css/duty-sheet-panels.css">
+<link rel="stylesheet" href="css/security.css">
+<link rel="stylesheet" href="css/annual-leave.css">
+<link rel="stylesheet" href="css/settings.css">
+<link rel="stylesheet" href="css/absence.css">
+<link rel="stylesheet" href="css/hours-overtime.css">
+<link rel="stylesheet" href="css/print.css">
+<link rel="stylesheet" href="css/rota-sheet.css">
+<style id="dynamicPageSize"></style>
+</head>
+<body>
+
+<div id="appShell">
+<header class="app-header">
+  <div class="header-left">
+    <div class="rm-monogram" aria-label="RM" title="Royal Mail">
+      <span class="mono-r">R</span><span class="mono-m">M</span>
+    </div>
+    <div>
+      <h1>RM Duty Builder</h1>
+      <div class="sub">Offline &middot; saved automatically to this device</div>
+    </div>
+    <div class="nav-tabs" id="navTabs">
+      <button class="nav-tab active" data-page="pageDutyBuilder" data-labelkey="navDutyBuilder">Duty Builder</button>
+      <button class="nav-tab" data-page="pageDutySheet" data-labelkey="navDutySheet">Duty Sheet</button>
+      <button class="nav-tab" data-page="pageAnnualLeave" data-labelkey="navAnnualLeave">Annual Leave</button>
+      <button class="nav-tab" data-page="pageHours" data-labelkey="navHours">Hours &amp; Overtime</button>
+      <button class="nav-tab" data-page="pageRotaSheet" data-labelkey="navRotaSheet">Rota Sheet</button>
+      <button class="nav-tab" data-page="pagePatterns" data-labelkey="navPatterns">Rotation Patterns</button>
+      <button class="nav-tab" data-page="pageSettings" data-labelkey="navSettings">Settings</button>
+    </div>
+  </div>
+  <div class="header-actions">
+    <span id="savedIndicator">Loading&hellip;</span>
+    <label class="file-btn btn btn-outline">Import backup
+      <input type="file" id="importDbInput" accept=".sqlite,.db,.rmvault">
+    </label>
+    <button class="btn btn-outline" id="exportDbBtn">Export backup</button>
+    <button class="btn btn-outline" id="lockNowBtn" style="display:none;">&#128274; Lock now</button>
+  </div>
+</header>
+
+<!-- ============== PAGE: DUTY BUILDER ============== -->
+<div class="page active" id="pageDutyBuilder">
+  <div class="layout">
+    <aside class="sidebar" id="sidebar">
+      <div class="sidebar-head">
+        <h2>Employees &amp; Duties</h2>
+        <button id="sidebarToggle" title="Collapse/expand">&laquo;</button>
+      </div>
+      <div class="sidebar-tabs">
+        <button class="sidebar-tab active" data-pane="paneEmployees" data-labelkey="sidebarEmployees">Employees</button>
+        <button class="sidebar-tab" data-pane="paneDuties" data-labelkey="sidebarDuties">Duties</button>
+      </div>
+      <div class="sidebar-body">
+        <div class="sidebar-pane active" id="paneEmployees">
+          <div class="sidebar-import-row">
+            <label class="file-btn btn btn-sm" style="background:#f0f0f0;color:#333;">Import from Excel
+              <input type="file" id="importEmployeesInput" accept=".xlsx,.xlsm,.xls">
+            </label>
+            <button class="btn btn-sm" id="exportEmployeesBtn" title="Download all employees as a clean .xlsx file">Export</button>
+          </div>
+          <form id="addEmployeeForm" class="add-inline-form">
+            <input type="text" id="newEmployeeName" placeholder="Add employee name" required>
+            <button class="btn btn-primary btn-sm" type="submit">+</button>
+          </form>
+          <input type="text" id="employeeSearch" placeholder="Search employees&hellip;">
+          <div class="count-line" id="employeeCount"></div>
+          <div class="chip-scroll" id="employeeList"></div>
+        </div>
+        <div class="sidebar-pane" id="paneDuties">
+          <div class="sidebar-import-row">
+            <label class="file-btn btn btn-sm" style="background:#f0f0f0;color:#333;">Import from Excel
+              <input type="file" id="importDutiesInput" accept=".xlsx,.xlsm,.xls">
+            </label>
+            <button class="btn btn-sm" id="exportDutiesBtn" title="Download all duties as a clean .xlsx file">Export</button>
+          </div>
+          <form id="addDutyForm" class="add-inline-form">
+            <input type="text" id="newDutyCode" class="code-input" placeholder="Code">
+            <input type="text" id="newDutyName" placeholder="Duty / round name" required>
+            <select id="newDutyType" title="Core duties are real rounds that always need covering. Cover duties (DOC/WOC/Leave Cover style) exist to cover others and never need cover themselves.">
+              <option value="CORE">Core</option>
+              <option value="COVER">Cover</option>
+            </select>
+            <button class="btn btn-primary btn-sm" type="submit">+</button>
+          </form>
+          <input type="text" id="dutySearch" placeholder="Search duties&hellip;">
+          <div class="count-line" id="dutyCount"></div>
+          <div class="chip-scroll" id="dutyList"></div>
+        </div>
+      </div>
+    </aside>
+
+    <main class="main">
+      <div class="builder-tabs">
+        <button class="builder-tab active" data-buildertab="paneDutyGroups">Duty Groups</button>
+        <button class="builder-tab" data-buildertab="paneBuilderSkills">Skills Matrix</button>
+      </div>
+
+      <div class="builder-pane active" id="paneDutyGroups">
+        <div class="section-title-row">
+          <h2>Duty Groups</h2>
+          <button class="btn btn-primary" id="addGroupBtn">+ Add Duty Group</button>
+        </div>
+        <div class="pattern-tabbar" id="builderPatternTabs"></div>
+        <div id="groupsContainer"></div>
+        <p class="empty-hint" style="font-style:normal;">Configure your duty groups here - drag the &#9776; handle to reorder groups, and drag duties/employees onto the slots. Switch to the <strong>Duty Sheet</strong> tab to see and print the resulting day-off calendar.</p>
+      </div>
+
+      <div class="builder-pane" id="paneBuilderSkills">
+        <div class="section-title-row">
+          <h2>Skills Matrix</h2>
+          <div style="display:flex;gap:8px;">
+            <button class="btn btn-sm" id="exportSkillsBtn">Export</button>
+            <label class="file-btn btn btn-sm">Import from Excel
+              <input type="file" id="importSkillsInput" accept=".xlsx,.xlsm,.xls">
+            </label>
+          </div>
+        </div>
+        <p class="empty-hint" style="font-style:normal;">Mark which duties/rounds each employee is trained and signed off to cover. When someone's on annual leave, sick, or otherwise absent on a working day, the Duty Sheet suggests a skilled, available person to cover their round. Import expects "Employee" and "Duty" column headers, matched by name - export first to see the exact format.</p>
+        <input type="text" id="skillsEmployeeSearch" placeholder="Search employees&hellip;">
+        <div id="skillsEmployeeList"></div>
+      </div>
+    </main>
+  </div>
+</div>
+
+<!-- ============== PAGE: DUTY SHEET ============== -->
+<div class="page" id="pageDutySheet">
+  <button id="uncoveredPanelToggle" class="uncovered-panel-toggle no-print" title="Show/hide duties needing cover, grouped by day">
+    &#9888; Uncovered <span id="uncoveredPanelBadge" class="uncovered-panel-badge"></span>
+  </button>
+  <div id="uncoveredPanel" class="uncovered-panel no-print">
+    <div class="uncovered-panel-head">
+      <h3>Uncovered Duties</h3>
+      <div style="display:flex;gap:6px;align-items:center;">
+        <button id="uncoveredPanelPrint" class="btn btn-sm" title="Print this list">Print</button>
+        <button id="uncoveredPanelClose" class="btn-icon" title="Close">&times;</button>
+      </div>
+    </div>
+    <p class="empty-hint" style="font-style:normal;margin-top:0;">Any working day with nobody actually covering it - no one assigned, or the assigned person is on annual leave, sick, or another absence with no cover arranged yet. Grouped by day, for whichever weeks/groups are currently shown. Click an entry to jump to it.</p>
+    <div id="uncoveredPanelContent"></div>
+  </div>
+  <button id="whosOffPanelToggle" class="whosoff-panel-toggle no-print" title="Show/hide who's off, grouped by day">
+    &#128100; Who's Off <span id="whosOffPanelBadge" class="whosoff-panel-badge"></span>
+  </button>
+  <div id="whosOffPanel" class="whosoff-panel no-print">
+    <div class="whosoff-panel-head">
+      <h3>Who's Off</h3>
+      <div style="display:flex;gap:6px;align-items:center;">
+        <button id="whosOffPanelPrint" class="btn btn-sm" title="Print this list">Print</button>
+        <button id="whosOffPanelClose" class="btn-icon" title="Close">&times;</button>
+      </div>
+    </div>
+    <p class="empty-hint" style="font-style:normal;margin-top:0;">Everyone booked as Annual Leave, Sick, on another absence, or simply on their normal day off, for whichever weeks/groups are currently shown - absences shown here even once cover has been arranged for them. Click an entry to jump to it.</p>
+    <div id="whosOffPanelContent"></div>
+  </div>
+  <div class="patterns-page-inner">
+    <div class="section-title-row no-print">
+      <h2>Duty Sheet</h2>
+      <div style="display:flex;gap:8px;">
+        <button class="btn btn-danger btn-sm" id="clearAllOverridesBtn">Clear all manual overrides</button>
+        <button class="btn" id="exportDutySheetExcelBtn">Export to Excel</button>
+        <button class="btn btn-primary" id="printDutySheetBtn">Print A3 (colour)</button>
+      </div>
+    </div>
+    <div id="dutySheetStickyBar" class="duty-sheet-sticky-bar no-print">
+      <div class="pattern-tabbar" id="sheetPatternTabs"></div>
+      <div class="cal-controls">
+        <label>Week commencing <input type="date" id="weekPicker"></label>
+        <label>Weeks to show <input type="number" id="numWeeks" value="4" min="1" max="6" style="width:60px;"></label>
+      </div>
+      <div class="legend-row" id="legendRow">
+        <span><span class="legend-swatch" style="background:#C6D9CE;"></span>Working - own round</span>
+        <span><span class="legend-swatch" style="background:#9DC3E6;"></span>Working - Saturday Route</span>
+        <span><span class="legend-swatch" style="background:#D9C2E9;"></span>Working - covering another role</span>
+        <span><span class="legend-swatch" style="background:#FFD966;"></span>Day off (incl. every Sunday)</span>
+        <span><span class="legend-swatch" style="background:#F2A9A0;"></span>Bank / Public Holiday (BH)</span>
+        <span><span class="legend-swatch" style="background:#F6B26B;"></span>Annual Leave (A/L)</span>
+        <span><span class="legend-swatch" style="background:#E08585;"></span>Sickness Absence (SICK)</span>
+        <span><span class="legend-swatch" style="background:#B5B9C6;"></span>Other Absence (ABS)</span>
+        <span><span class="legend-swatch" style="background:#D8483A;"></span>Uncovered (GAP - no employee assigned)</span>
+        <span>&#10003; = skilled cover available (see tooltip)</span>
+        <span>&#9888; dashed outline = double-booked (see tooltip)</span>
+      </div>
+    </div>
+    <div id="printTitle" class="print-title"></div>
+    <div class="legend-row print-only-legend" id="printLegendRow">
+      <span><span class="legend-swatch" style="background:#C6D9CE;"></span>Working - own round</span>
+      <span><span class="legend-swatch" style="background:#9DC3E6;"></span>Working - Saturday Route</span>
+      <span><span class="legend-swatch" style="background:#D9C2E9;"></span>Working - covering another role</span>
+      <span><span class="legend-swatch" style="background:#FFD966;"></span>Day off (incl. every Sunday)</span>
+      <span><span class="legend-swatch" style="background:#F2A9A0;"></span>Bank / Public Holiday (BH)</span>
+      <span><span class="legend-swatch" style="background:#F6B26B;"></span>Annual Leave (A/L)</span>
+      <span><span class="legend-swatch" style="background:#E08585;"></span>Sickness Absence (SICK)</span>
+      <span><span class="legend-swatch" style="background:#B5B9C6;"></span>Other Absence (ABS)</span>
+      <span><span class="legend-swatch" style="background:#D8483A;"></span>Uncovered (GAP - no employee assigned)</span>
+    </div>
+    <div id="sidePanelPrintOutput" class="side-panel-print-output"></div>
+    <div id="calendarContainer"></div>
+  </div>
+</div>
+
+<!-- ============== PAGE: ANNUAL LEAVE ============== -->
+<div class="page" id="pageAnnualLeave">
+  <div class="patterns-page-inner">
+    <div class="section-title-row">
+      <h2>Annual Leave &amp; Absence</h2>
+    </div>
+    <div class="settings-tabs">
+      <button class="absence-tab active" data-absencepane="paneAL">Annual Leave</button>
+      <button class="absence-tab" data-absencepane="paneOtherAbsence">Sickness &amp; Other Absence</button>
+    </div>
+
+    <div class="absence-pane active" id="paneAL">
+      <div class="section-title-row" style="margin-top:10px;">
+        <p class="empty-hint" style="font-style:normal;margin:0;">Each employee's booked annual-leave weeks, with a running count. Import from an Annual Leave Plan workbook (it will ask you to confirm any names that don't match exactly), a clean "Employee"/"Week Commencing" export of your own, or add/remove individual weeks by hand below.</p>
+        <div style="display:flex;gap:8px;flex-shrink:0;">
+          <button class="btn btn-sm" id="exportLeaveBtn">Export</button>
+          <button class="btn btn-danger btn-sm" id="clearAllLeaveBtn">Clear all leave</button>
+          <label class="file-btn btn btn-primary">Import from Excel
+            <input type="file" id="importLeaveInput" accept=".xlsx,.xlsm,.xls">
+          </label>
+        </div>
+      </div>
+      <input type="text" id="leaveEmployeeSearch" placeholder="Search employees&hellip;">
+      <div id="leaveEmployeeList"></div>
+    </div>
+
+    <div class="absence-pane" id="paneOtherAbsence">
+      <div class="section-title-row">
+        <p class="empty-hint" style="font-style:normal;margin:0;">Day-level sickness or other absence, separate from booked annual leave - shown in its own colour on the Duty Sheet, and used to suggest a skilled cover for any working day missed.</p>
+        <div style="display:flex;gap:8px;flex-shrink:0;">
+          <button class="btn btn-sm" id="exportOtherAbsenceBtn">Export</button>
+          <label class="file-btn btn btn-sm">Import from Excel
+            <input type="file" id="importOtherAbsenceInput" accept=".xlsx,.xlsm,.xls">
+          </label>
+        </div>
+      </div>
+      <input type="text" id="otherAbsenceEmployeeSearch" placeholder="Search employees&hellip;">
+      <div id="otherAbsenceEmployeeList"></div>
+    </div>
+  </div>
+
+  <div class="pattern-editor-panel" id="leaveImportPanel">
+    <div class="pattern-editor-head">
+      <h3>Review Annual Leave Import</h3>
+      <button class="btn" id="closeLeaveImportBtn">Close</button>
+    </div>
+    <div id="leaveImportBody"></div>
+    <div class="modal-actions">
+      <button class="btn btn-primary" id="commitLeaveImportBtn">Import confirmed leave weeks</button>
+    </div>
+  </div>
+</div>
+
+<!-- ============== PAGE: HOURS & OVERTIME ============== -->
+<div class="page" id="pageHours">
+  <div class="patterns-page-inner">
+    <div class="section-title-row">
+      <h2>Hours &amp; Overtime</h2>
+    </div>
+    <div class="settings-tabs">
+      <button class="hours-tab active" data-hourspane="paneTimes">Daily Times</button>
+      <button class="hours-tab" data-hourspane="paneOvertime">Overtime Log</button>
+    </div>
+
+    <div class="hours-pane active" id="paneTimes">
+      <p class="empty-hint" style="font-style:normal;">Each employee's normal daily start/end time, Monday to Saturday (nobody works Sunday). Hours are calculated automatically and used to work out overtime when someone covers a duty on their day off.</p>
+      <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-bottom:4px;">
+        <input type="text" id="timesEmployeeSearch" placeholder="Search employees&hellip;" style="margin-bottom:0;">
+        <button class="btn btn-sm" id="setAllFromRotationBtn">Set all from rotation</button>
+      </div>
+      <div id="timesEmployeeList"></div>
+    </div>
+
+    <div class="hours-pane" id="paneOvertime">
+      <p class="empty-hint" style="font-style:normal;">Automatically detected whenever a manual entry on the Duty Sheet shows someone working (green/blue/purple) on a day their rotation says should be off. Set an employee's daily times above for their hours to calculate correctly.</p>
+      <div style="display:flex;align-items:center;gap:8px;margin-bottom:10px;">
+        <label for="overtimeWeekFilter" style="font-size:13px;color:#555;">Show</label>
+        <select id="overtimeWeekFilter"><option value="all">All weeks</option></select>
+      </div>
+      <div id="overtimeSummary"></div>
+      <div id="overtimeList"></div>
+    </div>
+  </div>
+</div>
+
+<!-- ============== PAGE: SETTINGS ============== -->
+<div class="page" id="pageSettings">
+  <div class="patterns-page-inner">
+    <div class="section-title-row">
+      <h2>Settings</h2>
+    </div>
+    <div class="settings-tabs">
+      <button class="settings-tab active" data-settingspane="paneTabNames">Tab Names</button>
+      <button class="settings-tab" data-settingspane="paneBankHolidays">Bank Holidays</button>
+      <button class="settings-tab" data-settingspane="paneFiscalYear">Fiscal Year</button>
+      <button class="settings-tab" data-settingspane="paneSecurity">Security</button>
+      <button class="settings-tab" data-settingspane="paneModules">Modules</button>
+    </div>
+
+    <div class="settings-pane active" id="paneTabNames">
+      <div class="section-title-row" style="margin-top:10px;">
+        <p class="empty-hint" style="font-style:normal;margin:0;">Rename any tab in the system to whatever suits your office. Changes apply immediately.</p>
+        <button class="btn btn-sm" id="resetLabelsBtn">Reset tab names to defaults</button>
+      </div>
+      <div class="settings-card">
+        <div class="settings-card-title">Top navigation tabs</div>
+        <div id="navLabelSettings" class="settings-form"></div>
+      </div>
+      <div class="settings-card">
+        <div class="settings-card-title">Sidebar tabs (Duty Builder page)</div>
+        <div id="sidebarLabelSettings" class="settings-form"></div>
+      </div>
+    </div>
+
+    <div class="settings-pane" id="paneBankHolidays">
+      <div class="settings-card">
+        <div class="settings-card-title">Bank / Public Holidays</div>
+        <p class="empty-hint" style="font-style:normal;">Dates added here show automatically as <strong>BH</strong> in a distinct colour on the Duty Sheet calendar, for every role that day, overriding the normal rotation.</p>
+        <form id="addHolidayForm" class="add-inline-form" style="max-width:480px;margin-bottom:10px;">
+          <input type="date" id="newHolidayDate" required style="flex:0 0 155px;">
+          <input type="text" id="newHolidayName" placeholder="Holiday name (e.g. Christmas Day)" required>
+          <button class="btn btn-primary btn-sm" type="submit">+ Add</button>
+        </form>
+        <button class="btn btn-sm" id="quickAddHolidaysBtn">Quick-add England &amp; Wales bank holidays (2026 &amp; 2027)</button>
+        <button class="btn btn-sm" id="exportHolidaysBtn">Export</button>
+        <label class="file-btn btn btn-sm">Import from Excel
+          <input type="file" id="importHolidaysInput" accept=".xlsx,.xlsm,.xls">
+        </label>
+        <div id="holidaysList" class="holidays-list"></div>
+      </div>
+    </div>
+
+    <div class="settings-pane" id="paneFiscalYear">
+      <div class="settings-card">
+        <div class="settings-card-title">Fiscal Year Week Numbering</div>
+        <p class="empty-hint" style="font-style:normal;">Sets Week 1 of the fiscal year, used to show a week number (e.g. "Week 22") in the Overtime Log so entries are easier to track and match against payroll. Royal Mail's fiscal year typically starts on a Monday in late March - update this each year when the new fiscal year begins.</p>
+        <label for="fiscalYearStartInput" style="display:block;font-size:12px;color:#555;margin-bottom:4px;">Week 1 starts w/c</label>
+        <input type="date" id="fiscalYearStartInput" style="max-width:200px;">
+      </div>
+    </div>
+
+    <div class="settings-pane" id="paneSecurity">
+      <div class="settings-card">
+        <div class="settings-card-title">Password Lock</div>
+        <p id="lockStatusText" class="empty-hint" style="font-style:normal;"></p>
+
+        <form id="setLockForm" style="max-width:320px;">
+          <label style="display:block;font-size:12px;color:#555;margin-bottom:4px;">New password</label>
+          <input type="password" id="newLockPassword" autocomplete="new-password" style="width:100%;padding:7px 9px;border:1px solid var(--border);border-radius:6px;margin-bottom:8px;">
+          <label style="display:block;font-size:12px;color:#555;margin-bottom:4px;">Confirm password</label>
+          <input type="password" id="confirmLockPassword" autocomplete="new-password" style="width:100%;padding:7px 9px;border:1px solid var(--border);border-radius:6px;margin-bottom:8px;">
+          <div id="setLockError" class="lock-error" style="margin-bottom:8px;"></div>
+          <div class="readonly-note" style="margin-bottom:10px;">There is no way to recover this password if it's forgotten. The data is genuinely encrypted with it - write the password down somewhere safe before setting it.</div>
+          <label style="display:block;font-size:12px;color:#555;margin-bottom:10px;">
+            <input type="checkbox" id="setLockAckCheckbox"> I understand this password cannot be recovered
+          </label>
+          <button type="submit" class="btn btn-primary">Set password</button>
+        </form>
+
+        <div id="manageLockSection" style="display:none;">
+          <button class="btn btn-sm" id="changeLockBtn">Change password</button>
+          <button class="btn btn-sm btn-danger" id="removeLockBtn">Remove lock</button>
+          <p class="empty-hint" style="font-style:normal;margin-top:10px;">Use the <strong>Lock now</strong> button in the top-right header to lock this system immediately without closing the browser - handy before stepping away from a shared computer.</p>
+          <label style="display:block;margin-top:12px;font-weight:700;font-size:12.5px;">Auto-lock after (minutes of inactivity)</label>
+          <input type="number" id="autoLockMinutesInput" min="1" max="240" step="1" style="width:90px;padding:6px 8px;border:1px solid var(--border);border-radius:6px;">
+          <p class="empty-hint" style="font-style:normal;margin-top:4px;">The system locks itself automatically after this long with no mouse, keyboard, or scroll activity - so an unattended unlocked screen isn't left open indefinitely.</p>
+        </div>
+
+        <p class="empty-hint" style="font-style:normal;margin-top:14px;">This protects the data stored in this browser (and casual access to this screen). <strong>Export backup</strong> always produces an encrypted file, whether or not a password is set here - if none is set, it asks you to choose one just for that backup.</p>
+      </div>
+
+      <div class="settings-card" style="margin-top:16px;">
+        <div class="settings-card-title">Anonymised Demo Copy</div>
+        <p class="empty-hint" style="font-style:normal;">Makes a separate copy of your data for showing the tool to management or anyone else - every employee name, duty/round name, and office name is replaced with a realistic sample value, so nobody's real details are in it. Everything else (the rotation patterns, leave weeks, overtime logic, colours - the actual functionality) stays fully intact and demonstrable.</p>
+        <button class="btn btn-primary" id="downloadAnonymisedBtn">Download anonymised copy (.sqlite)</button>
+        <p class="empty-hint" style="font-style:normal;margin-top:8px;">This only affects the downloaded file - your data here is not changed.</p>
+      </div>
+    </div>
+
+    <div class="settings-pane" id="paneModules">
+      <div class="settings-card">
+        <div class="settings-card-title">Modules</div>
+        <p class="empty-hint" style="font-style:normal;">Core features are always on. Optional features can be switched off if your office doesn't use them - their data is never deleted, so turning one back on later restores full access to whatever was already there. Changing a toggle reloads the page.</p>
+        <div id="modulesSettingsList" class="modules-list"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ============== PAGE: ROTA SHEET ============== -->
+<div class="page" id="pageRotaSheet">
+  <div class="patterns-page-inner">
+    <div class="section-title-row">
+      <h2>Rota Sheet</h2>
+      <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;">
+        <input type="date" id="rotaSheetDate">
+        <button class="btn btn-sm" id="rotaSheetTodayBtn">This week</button>
+        <button class="btn btn-sm" id="rotaSheetPrintDayBtn">Print A3 (portrait)</button>
+      </div>
+    </div>
+    <p class="empty-hint" style="font-style:normal;">One row per person, colour-coded across the week - days off, annual leave, sickness, and the duty they're covering - plus a plain-language list of what still needs covering underneath, with a suggestion for who to ask.</p>
+    <div id="rotaSheetContent"></div>
+  </div>
+</div>
+
+<!-- ============== PAGE: ROTATION PATTERNS ============== -->
+<div class="page" id="pagePatterns">
+  <div class="patterns-page-inner">
+    <div class="section-title-row">
+      <h2>Rotation Patterns</h2>
+      <button class="btn btn-primary" id="newPatternBtn">+ New Pattern</button>
+    </div>
+    <p class="empty-hint" style="font-style:normal;">Two built-in Royal Mail patterns are ready to use. Duplicate one to build a custom variant, or create a brand new pattern from scratch. In the schedule grid, just type into a cell - a single letter on a Saturday goes blue (Saturday Route), typing another role's name goes purple (Covering), "OFF" goes yellow, and anything else stays green (Working). Click the small dot in the corner any time to set the colour manually instead.</p>
+    <div class="patterns-grid" id="patternsContainer"></div>
+
+    <div class="pattern-editor-panel" id="patternEditorPanel">
+      <div class="pattern-editor-head">
+        <div>
+          <h3 id="editorTitle">Edit pattern</h3>
+          <input type="text" id="editorNameInput">
+        </div>
+        <button class="btn" id="closeEditorBtn">Close</button>
+      </div>
+      <div class="readonly-note" id="editorReadonlyNote" style="display:none;">
+        This is a built-in pattern - you can rename it above, but the day-off grid itself is locked. Click <strong>Duplicate</strong> on the card to create an editable copy with its own schedule.
+      </div>
+      <div class="editor-controls">
+        <button class="btn btn-sm" id="addRoleBtn">+ Add role</button>
+        <button class="btn btn-sm" id="addWeekBtn">+ Add week</button>
+        <button class="btn btn-sm" id="removeWeekBtn">&minus; Remove last week</button>
+        <label id="blockSizeLabel" style="display:flex;align-items:center;gap:6px;font-size:12.5px;color:#555;margin-left:6px;">
+          Duties per row in Duty Config
+          <input type="number" id="blockSizeInput" min="1" style="width:60px;padding:5px 7px;border:1px solid var(--border);border-radius:6px;">
+        </label>
+        <button class="btn btn-primary btn-sm" id="savePatternBtn">Done</button>
+      </div>
+      <div id="patternGridWrap" style="overflow-x:auto;"></div>
+    </div>
+  </div>
+</div>
+
+<div class="modal-backdrop" id="addGroupModal">
+  <form class="modal" id="addGroupForm">
+    <h3>Add Duty Group</h3>
+    <label>Group name</label>
+    <input type="text" id="newGroupName" placeholder="e.g. L1 - Llangefni Town" required>
+    <label>Rotation pattern</label>
+    <select id="newGroupPattern"></select>
+    <label>Cycle Week 1 starts w/c</label>
+    <input type="date" id="newGroupAnchor" required>
+    <div class="modal-actions">
+      <button type="button" class="btn" id="cancelAddGroup">Cancel</button>
+      <button type="submit" class="btn btn-primary">Create group</button>
+    </div>
+  </form>
+</div>
+
+<div class="modal-backdrop" id="coreGapsModal">
+  <div class="modal" id="coreGapsModalInner">
+    <h3 id="coreGapsModalTitle">Uncovered core duties</h3>
+    <div id="coreGapsModalContent"></div>
+    <div class="modal-actions">
+      <button type="button" class="btn btn-primary" id="coreGapsModalCloseBtn">Close</button>
+    </div>
+  </div>
+</div>
+
+<div class="modal-backdrop" id="printSelectModal">
+  <form class="modal" id="printSelectForm">
+    <h3>Choose duty groups to print</h3>
+    <p class="empty-hint" style="font-style:normal;">Only groups with at least one employee assigned are listed. Whatever's ticked here will be included on the printed A3 sheet, regardless of the pattern filter on screen.</p>
+    <div style="display:flex;gap:8px;margin-bottom:12px;">
+      <button type="button" class="btn btn-sm btn-modal-secondary" id="printSelectAllBtn">Select all</button>
+      <button type="button" class="btn btn-sm btn-modal-secondary" id="printSelectNoneBtn">Select none</button>
+    </div>
+    <div id="printGroupCheckboxes" class="print-group-list"></div>
+    <div class="modal-actions">
+      <button type="button" class="btn" id="printSelectCancelBtn">Cancel</button>
+      <button type="submit" class="btn btn-primary">Print</button>
+    </div>
+  </form>
+</div>
+
+<div class="modal-backdrop" id="rotaPrintSelectModal">
+  <form class="modal" id="rotaPrintSelectForm">
+    <h3>Choose what to print</h3>
+    <p class="empty-hint" style="font-style:normal;">Only groups with at least one employee assigned are listed.</p>
+    <div style="display:flex;gap:8px;margin-bottom:12px;">
+      <button type="button" class="btn btn-sm btn-modal-secondary" id="rotaPrintSelectAllBtn">Select all</button>
+      <button type="button" class="btn btn-sm btn-modal-secondary" id="rotaPrintSelectNoneBtn">Select none</button>
+    </div>
+    <div id="rotaPrintGroupCheckboxes" class="print-group-list"></div>
+    <label class="print-group-row" style="margin-top:12px;border:1px solid var(--border);border-radius:8px;">
+      <input type="checkbox" id="rotaPrintIncludeUncovered" checked>
+      <span>Include the "Needs cover this week" section</span>
+    </label>
+    <div class="modal-actions">
+      <button type="button" class="btn" id="rotaPrintSelectCancelBtn">Cancel</button>
+      <button type="submit" class="btn btn-primary">Print</button>
+    </div>
+  </form>
+</div>
+
+<div class="modal-backdrop" id="exportPasswordModal">
+  <form class="modal" id="exportPasswordForm">
+    <h3 id="exportPasswordTitle">Protect this backup</h3>
+    <p id="exportPasswordHint" class="empty-hint" style="font-style:normal;"></p>
+    <label>Password</label>
+    <input type="password" id="exportPasswordInput" autocomplete="new-password">
+    <div id="exportPasswordConfirmWrap">
+      <label>Confirm password</label>
+      <input type="password" id="exportPasswordConfirmInput" autocomplete="new-password">
+      <label class="override-color-option" style="margin-top:8px;">
+        <input type="checkbox" id="exportPasswordAckCheckbox">
+        I understand this password cannot be recovered if forgotten
+      </label>
+    </div>
+    <div id="exportPasswordError" class="lock-error"></div>
+    <div class="modal-actions">
+      <button type="button" class="btn" id="exportPasswordCancelBtn">Cancel</button>
+      <button type="submit" class="btn btn-primary">Continue</button>
+    </div>
+  </form>
+</div>
+
+<div class="modal-backdrop" id="cellOverrideModal">
+  <form class="modal" id="cellOverrideForm">
+    <h3>Edit Duty Sheet Cell</h3>
+    <p id="cellOverrideContext" class="empty-hint" style="font-style:normal;margin:0 0 10px;"></p>
+    <div class="hide-for-person2">
+      <label>Colour</label>
+      <div class="override-color-choices">
+        <label class="override-color-option"><input type="radio" name="overrideKind" value="WORK" checked><span class="override-swatch swatch-work"></span> Green &ndash; working own round</label>
+        <label class="override-color-option"><input type="radio" name="overrideKind" value="SATWORK"><span class="override-swatch swatch-satwork"></span> Blue &ndash; working another round</label>
+        <label class="override-color-option"><input type="radio" name="overrideKind" value="COVER"><span class="override-swatch swatch-cover"></span> Purple &ndash; covering someone else</label>
+        <label class="override-color-option"><input type="radio" name="overrideKind" value="SPARE"><span class="override-swatch swatch-spare"></span> Yellow &ndash; Spare / DPR (no role today)</label>
+      </div>
+      <label id="overrideDutyPickLabel">Pick from their skills matrix (optional)</label>
+      <select id="overrideDutyPick">
+        <option value="">&ndash; choose a duty they're skilled for &ndash;</option>
+      </select>
+      <label>Duty code / note</label>
+      <input type="text" id="overrideLabelInput" maxlength="24" placeholder="e.g. A7">
+    </div>
+    <div id="suggestedCoverSection" style="display:none;margin-top:8px;">
+      <div class="overtime-absence-hint" style="background:#eafaf0;border-color:#b7e0c6;color:#1e7a4a;flex-wrap:wrap;">
+        <span id="suggestedCoverLabel">Skilled &amp; available:</span>
+        <div id="suggestedCoverButtons" style="display:flex;gap:6px;flex-wrap:wrap;"></div>
+      </div>
+    </div>
+
+    <div class="hide-for-person2">
+      <label style="margin-top:14px;">Overtime for this day</label>
+      <p class="empty-hint" style="font-style:normal;margin:2px 0 8px;font-size:11.5px;">Add one entry per reason - you can log more than one (e.g. worked a day off AND started early that same day).</p>
+      <div id="overtimeAbsenceHint" class="overtime-absence-hint" style="display:none;"></div>
+      <div id="overtimeEntriesList" class="overtime-entries-list"></div>
+      <div class="overtime-add-row">
+        <select id="newOvertimeReason">
+          <option value="ABSENCE">Absence overtime (worked a day off)</option>
+          <option value="EARLY_START">Pressure overtime (early start)</option>
+          <option value="LATE_FINISH">Pressure overtime (late finish / worked over)</option>
+        </select>
+        <input type="number" id="newOvertimeMinutes" min="1" max="720" step="5" placeholder="Minutes">
+        <button type="button" class="btn btn-sm" id="addOvertimeEntryBtn">+ Add</button>
+      </div>
+      <div class="override-minutes-row" style="margin-top:6px;">
+        <span style="font-size:11px;color:#888;">Quick fill:</span>
+        <button type="button" class="btn btn-sm" data-mins-preset="15">15m</button>
+        <button type="button" class="btn btn-sm" data-mins-preset="30">30m</button>
+        <button type="button" class="btn btn-sm" data-mins-preset="45">45m</button>
+        <button type="button" class="btn btn-sm" data-mins-preset="60">60m</button>
+      </div>
+    </div>
+
+    <div class="modal-actions">
+      <button type="button" class="btn btn-danger hide-for-person2" id="clearOverrideBtn">Clear override</button>
+      <button type="button" class="btn" id="cancelOverrideBtn">Close</button>
+      <button type="submit" class="btn btn-primary hide-for-person2" id="saveOverrideBtn">Save</button>
+    </div>
+  </form>
+</div>
+
+<footer class="app-footer">RM Duty Builder <span id="appBuildStamp"></span> &middot; runs entirely in your browser &middot; data stored locally via IndexedDB &middot; use Export backup to back up</footer>
+<div class="copyright-footer" id="copyrightFooter"></div>
+</div>
+
+<div class="lock-screen" id="lockScreen">
+  <form class="lock-box" id="lockUnlockForm">
+    <div class="lock-icon">&#128274;</div>
+    <h2>Locked</h2>
+    <p class="empty-hint" style="font-style:normal;">This system is password-protected. Enter the password to continue.</p>
+    <input type="password" id="lockPasswordInput" placeholder="Password" autocomplete="current-password" required>
+    <div id="lockError" class="lock-error"></div>
+    <button type="submit" class="btn btn-primary" style="width:100%;">Unlock</button>
+  </form>
+</div>
+
+
+<script src="js/vendor/sql-wasm.js"></script>
+<script src="js/vendor/sql-wasm-data.js"></script>
+<script src="js/vendor/xlsx.full.js"></script>
+<script src="js/vendor/exceljs.bundle.js"></script>
+
+<script src="js/state/domainConstants.js"></script>
+<script src="js/utils/dates.js"></script>
+<script src="js/services/moduleRegistry.js"></script>
+<script src="js/services/db.js"></script>
+<script src="js/services/security.js"></script>
+<script src="js/services/anonymise.js"></script>
+<script src="js/services/backup.js"></script>
+<script src="js/services/excelIO.js"></script>
+<script src="js/services/coverageEngine.js"></script>
+
+<script src="js/modules/navigation.js"></script>
+<script src="js/modules/employeesDuties.js"></script>
+<script src="js/modules/patterns.js"></script>
+<script src="js/modules/dutyGroups.js"></script>
+<script src="js/modules/dutySheet.js"></script>
+<script src="js/modules/coverSuggestions.js"></script>
+<script src="js/modules/rotaSheet.js"></script>
+<script src="js/modules/annualLeave.js"></script>
+<script src="js/modules/skillsMatrix.js"></script>
+<script src="js/modules/absence.js"></script>
+<script src="js/modules/hoursOvertime.js"></script>
+<script src="js/modules/settings.js"></script>
+
+<script src="js/app/bootstrap.js"></script>
+</body>
+</html>

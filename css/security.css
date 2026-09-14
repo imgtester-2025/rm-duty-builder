@@ -1,0 +1,12 @@
+/* ---------- Lock screen ---------- */
+.lock-screen{display:none;position:fixed;inset:0;background:linear-gradient(160deg,#6a0018,#D2042D 60%);z-index:1000;
+  align-items:center;justify-content:center;}
+.lock-screen.open{display:flex;}
+.lock-box{background:#fff;border-radius:var(--radius-lg);padding:34px 30px;width:340px;max-width:90vw;text-align:center;
+  box-shadow:var(--shadow-lg);}
+.lock-icon{font-size:32px;margin-bottom:4px;}
+.lock-box h2{margin:4px 0 8px;color:var(--ink);font-weight:650;}
+.lock-box input[type=password]{width:100%;padding:11px 12px;
+  font-size:15px;margin:12px 0 8px;text-align:center;}
+.lock-error{color:var(--rm-red-dark);font-size:12.5px;min-height:16px;margin-bottom:8px;}
+

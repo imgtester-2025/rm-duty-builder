@@ -1,0 +1,85 @@
+.cal-controls{display:flex;gap:14px;align-items:center;flex-wrap:wrap;background:var(--card);border:1px solid var(--border);
+  border-radius:var(--radius-lg);padding:12px 16px;box-shadow:var(--shadow-xs);}
+.duty-sheet-sticky-bar{position:sticky;top:var(--header-h,0px);z-index:40;background:var(--paper);padding-bottom:10px;
+  display:flex;flex-direction:column;gap:10px;}
+.cal-controls label{font-size:12px;color:var(--ink-muted);display:flex;align-items:center;gap:6px;font-weight:600;}
+.cal-controls input{padding:6px 8px;font-size:13px;}
+
+table.cal-table{border-collapse:collapse;width:100%;margin-bottom:20px;background:var(--card);
+  border:1px solid var(--border);border-radius:var(--radius-md);font-size:12px;overflow:hidden;box-shadow:var(--shadow-xs);}
+table.cal-table caption{text-align:left;font-weight:700;font-size:14px;padding:11px 14px;background:var(--rm-red-soft);color:var(--rm-red-dark);caption-side:top;
+  position:sticky;top:var(--sticky-bar-h,0px);z-index:32;}
+table.cal-table th, table.cal-table td{border:1px solid var(--border);padding:4px 6px;text-align:center;}
+table.cal-table tr.role-block-end td{border-bottom:2px solid #8a8f98;}
+table.cal-table th.week-band{background:#eef1f6;font-weight:700;color:var(--ink-muted);}
+table.cal-table thead{position:sticky;top:calc(var(--sticky-bar-h,0px) + var(--caption-h,0px));z-index:31;}
+table.cal-table thead tr th:first-child{background:#fff;}
+table.cal-table th.day-head{background:#f7f8fa;font-weight:600;color:var(--ink-muted);}
+td.row-label{text-align:left;min-width:150px;background:#fbfbfc;}
+.row-role{font-weight:700;font-size:11px;color:var(--rm-red-dark);}
+.row-emp{font-size:12px;}
+.row-duty{font-size:10px;color:var(--ink-muted);}
+.row-anchor-note{font-size:9.5px;color:#8a6a10;background:#fff8e6;border-radius:4px;padding:1px 4px;display:inline-block;margin-top:2px;}
+.unfilled{color:#b0b6c0;font-style:italic;}
+td.cal-cell{font-weight:700;font-size:11px;}
+td.cal-cell-editable{cursor:pointer;transition:outline-color .08s;}
+td.cal-cell-editable:hover{outline:2px solid var(--rm-red);outline-offset:-2px;}
+td.cal-cell-override{box-shadow:inset 0 0 0 2px #333;}
+td.cal-cell-agreed-ot{position:relative;}
+td.cal-cell-agreed-ot::after{content:'';position:absolute;top:1px;right:1px;width:0;height:0;
+  border-style:solid;border-width:0 7px 7px 0;border-color:transparent #333 transparent transparent;}
+td.cal-cell-has-suggestion{position:relative;}
+td.cal-cell-has-suggestion::before{content:'\2713';position:absolute;bottom:0;left:1px;font-size:9px;line-height:1;
+  color:#1e7a4a;font-weight:900;}
+/* Duty-status cell colours are semantically load-bearing (they're how the
+   whole app communicates a day's status at a glance) and are intentionally
+   left unchanged by the visual refresh - only chrome/typography/spacing
+   around them was modernised. */
+td.cell-work{background:var(--work);}
+td.cell-satwork{background:var(--satwork);}
+td.cell-cover{background:var(--cover);}
+td.cell-spare{background:var(--spare);}
+td.cell-off{background:var(--off);}
+td.cell-bh{background:var(--bh);}
+td.cell-al{background:var(--al);}
+td.cell-sick{background:var(--sick);}
+td.cell-other{background:var(--other);}
+td.cell-uncovered{background:var(--uncovered);color:#fff;font-weight:800;}
+td.cal-cell-duplicate{position:relative;outline:2px dashed #b8860b;outline-offset:-2px;}
+td.cal-cell-duplicate::before{content:'\26A0';position:absolute;top:0;left:2px;font-size:9px;color:#b8860b;}
+
+.legend-row{display:flex;gap:16px;flex-wrap:wrap;font-size:12px;background:var(--card);border:1px solid var(--border);
+  border-radius:var(--radius-lg);padding:11px 16px;box-shadow:var(--shadow-xs);}
+.legend-swatch{display:inline-block;width:13px;height:13px;border-radius:4px;margin-right:6px;vertical-align:middle;}
+
+.modal-backdrop{display:none;position:fixed;inset:0;background:rgba(16,20,26,.45);align-items:center;justify-content:center;z-index:100;
+  backdrop-filter:blur(1px);}
+.modal.person2-mode .hide-for-person2{display:none !important;}
+.modal-backdrop.open{display:flex;}
+.modal{background:#fff;border-radius:var(--radius-lg);padding:22px;width:340px;max-width:92vw;box-shadow:var(--shadow-lg);}
+#printSelectForm, #rotaPrintSelectForm{width:420px;}
+.modal h3{margin-top:0;font-size:16px;font-weight:650;color:var(--ink);}
+.modal label{display:block;font-size:12px;color:var(--ink-muted);font-weight:600;margin:10px 0 4px;}
+.modal input, .modal select{width:100%;padding:8px 10px;font-size:13px;}
+.modal-actions{display:flex;justify-content:flex-end;gap:8px;margin-top:18px;}
+.override-color-choices{display:flex;flex-direction:column;gap:6px;}
+.override-color-option{display:flex;align-items:center;gap:8px;font-size:13px;font-weight:400;cursor:pointer;}
+.override-color-option input{width:auto;}
+.override-swatch{display:inline-block;width:16px;height:16px;border-radius:4px;border:1px solid rgba(0,0,0,.15);}
+.override-swatch.swatch-work{background:var(--work);}
+.override-swatch.swatch-satwork{background:var(--satwork);}
+.override-swatch.swatch-cover{background:var(--cover);}
+.override-swatch.swatch-spare{background:var(--spare);}
+.override-minutes-row{display:flex;gap:6px;align-items:center;}
+.override-minutes-row input{width:70px;padding:8px 10px;font-size:13px;}
+.override-minutes-row .btn{padding:5px 9px;}
+.overtime-entries-list{display:flex;flex-direction:column;gap:6px;margin-bottom:8px;}
+.overtime-entry-row{display:flex;align-items:center;justify-content:space-between;gap:8px;background:var(--paper);
+  border:1px solid var(--border);border-radius:var(--radius-sm);padding:7px 11px;font-size:12.5px;}
+.overtime-entry-row .oe-reason{font-weight:600;}
+.overtime-entry-row .oe-minutes{color:var(--ink-muted);flex-shrink:0;}
+.overtime-add-row{display:flex;gap:6px;align-items:center;flex-wrap:wrap;}
+.overtime-add-row select{flex:1;min-width:180px;padding:8px 10px;font-size:12.5px;}
+.overtime-add-row input{width:90px;padding:8px 10px;font-size:13px;}
+.overtime-absence-hint{background:#fff8e6;border:1px solid #f2d98a;color:#8a6a10;padding:8px 11px;border-radius:var(--radius-sm);font-size:12px;margin-bottom:8px;display:flex;justify-content:space-between;align-items:center;gap:8px;}
+

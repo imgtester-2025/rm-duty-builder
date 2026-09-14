@@ -1,0 +1,59 @@
+/* ---------- Print (Duty Sheet, A3 colour) ---------- */
+.print-title{display:none;}
+.print-only-legend{display:none;}
+@media print{
+  /* Page size/orientation is set dynamically just before printing (see
+     #dynamicPageSize below) - the Duty Sheet prints A3 landscape, the
+     Rota Sheet prints A3 portrait, and a single hardcoded @page rule
+     here can't tell which page is currently being printed. */
+  html, body{ background:#fff !important; }
+  header.app-header, footer.app-footer, .copyright-footer, .no-print{ display:none !important; }
+  table.cal-table caption, table.cal-table thead{ position:static !important; }
+  body *{ visibility:hidden; }
+  #pageDutySheet.active, #pageDutySheet.active *, #pageRotaSheet.active, #pageRotaSheet.active *{ visibility:visible; }
+  #pageDutySheet.active, #pageRotaSheet.active{ display:block !important; position:absolute; left:0; top:0; width:100%; padding:0; }
+  .patterns-page-inner{ padding:0 !important; }
+  .print-title{ display:block !important; font-size:20px; font-weight:700; color:var(--rm-red-dark); margin-bottom:8px; }
+  .print-only-legend{ display:flex !important; -webkit-print-color-adjust:exact; print-color-adjust:exact; border:none; padding:0 0 10px 0; margin-bottom:6px; border-bottom:1px solid #ccc; }
+  table.cal-table{ -webkit-print-color-adjust:exact; print-color-adjust:exact; color-adjust:exact; font-size:11px; }
+  table.cal-table tr{ page-break-inside:avoid; }
+  #sidePanelPrintOutput{ display:none; }
+  body.printing-side-panel #calendarContainer,
+  body.printing-side-panel #dutySheetStickyBar,
+  body.printing-side-panel .print-title,
+  body.printing-side-panel .print-only-legend{ display:none !important; }
+  body.printing-side-panel #sidePanelPrintOutput{ display:block !important; }
+  body.printing-side-panel #sidePanelPrintOutput h2{ color:var(--rm-red-dark); font-size:18px; margin:0 0 4px 0; }
+  body.printing-side-panel #sidePanelPrintOutput .empty-hint{ font-style:normal; margin:0 0 14px 0; font-size:12px; }
+  .print-week-grid-page{ page-break-after:always; }
+  .print-week-grid-page:last-child{ page-break-after:auto; }
+  .print-week-grid-page h3{ color:var(--rm-red-dark); font-size:15px; margin:0 0 8px 0; }
+  .print-week-grid-table{ width:100%; border-collapse:collapse; table-layout:fixed; }
+  .print-week-grid-table th{ background:var(--rm-red); color:#fff; padding:5px 4px; font-size:11px; border:1px solid #fff; }
+  .print-week-grid-table thead tr:first-child th{ font-size:12px; }
+  .print-week-grid-day{ border:1px solid var(--border); vertical-align:top; padding:4px; width:14.28%; height:180px; }
+  .print-week-grid-item{ display:flex; flex-direction:column; gap:1px; font-size:10px; padding:3px 4px; margin-bottom:3px; border-radius:4px; background:#f4f5f7; border:1px solid var(--border); }
+  .print-week-grid-item strong{ font-size:10.5px; }
+  .print-week-grid-item span{ color:#555; }
+  .print-week-grid-empty{ color:#999; font-size:10px; font-style:italic; }
+  table.cal-table caption{ -webkit-print-color-adjust:exact; print-color-adjust:exact; }
+  td.cell-work{ background:var(--work) !important; }
+  td.cell-satwork{ background:var(--satwork) !important; }
+  td.cell-cover{ background:var(--cover) !important; }
+  td.cell-spare{ background:var(--spare) !important; }
+  td.cell-off{ background:var(--off) !important; }
+  td.cell-bh{ background:var(--bh) !important; }
+  td.cell-al{ background:var(--al) !important; }
+  td.cell-sick{ background:var(--sick) !important; }
+  td.cell-other{ background:var(--other) !important; }
+  td.cell-uncovered{ background:var(--uncovered) !important; color:#fff !important; }
+  td.cal-cell-override{ box-shadow:none !important; border:2px solid #333 !important; }
+  td.cal-cell-duplicate{ outline:none !important; border:2px dashed #b8860b !important; }
+}
+
+@media (max-width:900px){
+  .layout{flex-direction:column;}
+  .sidebar{width:100%;flex:none;position:static;height:auto;}
+  .sidebar.collapsed{width:100%;flex:none;}
+}
+

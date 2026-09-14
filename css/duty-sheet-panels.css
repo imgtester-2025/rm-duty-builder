@@ -1,0 +1,52 @@
+/* ---------- Uncovered duties panel (Duty Sheet) ---------- */
+.uncovered-panel-toggle{position:fixed;top:130px;right:0;z-index:60;background:var(--uncovered);color:#fff;border:none;
+  padding:10px 14px;border-radius:var(--radius-md) 0 0 var(--radius-md);cursor:pointer;font-weight:700;font-size:12.5px;
+  box-shadow:var(--shadow-md);transition:padding-right .12s;}
+.uncovered-panel-toggle:hover{padding-right:18px;}
+.uncovered-panel-badge{background:#fff;color:var(--uncovered);border-radius:10px;padding:1px 7px;margin-left:4px;font-size:11px;font-weight:800;}
+.side-panel-print-output{display:none;}
+.uncovered-panel{position:fixed;top:0;right:-340px;width:320px;height:100vh;background:#fff;
+  box-shadow:var(--shadow-lg);z-index:70;transition:right .25s ease;display:flex;flex-direction:column;
+  padding:20px;overflow-y:auto;box-sizing:border-box;}
+.uncovered-panel.open{right:0;}
+.uncovered-panel-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:4px;}
+.uncovered-panel-head h3{margin:0;color:var(--rm-red-dark);font-size:16px;font-weight:650;}
+.uncovered-day-group{margin-bottom:16px;}
+.uncovered-day-header{font-weight:700;font-size:13px;color:var(--ink);border-bottom:2px solid var(--uncovered);
+  padding-bottom:4px;margin-bottom:6px;display:flex;justify-content:space-between;align-items:center;}
+.uncovered-day-count{background:var(--uncovered);color:#fff;border-radius:var(--radius-pill);padding:1px 8px;font-size:11px;flex-shrink:0;}
+.uncovered-day-list{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:4px;}
+.uncovered-day-list li{display:flex;flex-direction:column;font-size:12.5px;background:#fdf1ef;border-radius:6px;
+  padding:5px 8px;cursor:pointer;border:1px solid transparent;}
+.uncovered-day-list li:hover{border-color:var(--uncovered);}
+.uncovered-group-name{font-size:10.5px;color:#888;}
+td.cal-cell-jump-flash{outline:3px solid var(--rm-red) !important;outline-offset:-3px;}
+
+/* ---------- Who's off panel (Duty Sheet) - same idea, different colour ---------- */
+.whosoff-panel-toggle{position:fixed;top:180px;right:0;z-index:60;background:var(--whosoff);color:#fff;border:none;
+  padding:10px 14px;border-radius:var(--radius-md) 0 0 var(--radius-md);cursor:pointer;font-weight:700;font-size:12.5px;
+  box-shadow:var(--shadow-md);transition:padding-right .12s;}
+.whosoff-panel-toggle:hover{padding-right:18px;}
+.whosoff-panel-badge{background:#fff;color:var(--whosoff);border-radius:10px;padding:1px 7px;margin-left:4px;font-size:11px;font-weight:800;}
+.whosoff-panel{position:fixed;top:0;right:-340px;width:320px;height:100vh;background:#fff;
+  box-shadow:var(--shadow-lg);z-index:70;transition:right .25s ease;display:flex;flex-direction:column;
+  padding:20px;overflow-y:auto;box-sizing:border-box;}
+.whosoff-panel.open{right:0;}
+.whosoff-panel-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:4px;}
+.whosoff-panel-head h3{margin:0;color:var(--whosoff);font-size:16px;font-weight:650;}
+.whosoff-day-group{margin-bottom:16px;}
+.whosoff-day-header{font-weight:700;font-size:13px;color:var(--ink);border-bottom:2px solid var(--whosoff);
+  padding-bottom:4px;margin-bottom:6px;display:flex;justify-content:space-between;align-items:center;}
+.whosoff-day-count{background:var(--whosoff);color:#fff;border-radius:var(--radius-pill);padding:1px 8px;font-size:11px;flex-shrink:0;}
+.whosoff-day-list{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:4px;}
+.whosoff-day-list li{display:flex;flex-direction:column;font-size:12.5px;background:#eaf1fa;border-radius:6px;
+  padding:5px 8px;cursor:pointer;border:1px solid transparent;}
+.whosoff-day-list li:hover{border-color:var(--whosoff);}
+.whosoff-type-tag{font-size:10px;font-weight:800;text-transform:uppercase;padding:0 5px;border-radius:4px;color:#fff;display:inline-block;margin-right:5px;}
+.whosoff-type-al{background:var(--al);color:#5a3400;}
+.whosoff-type-sick{background:var(--sick);}
+.whosoff-type-other{background:var(--other);color:#333;}
+.whosoff-type-off{background:var(--off);color:#5a4a00;}
+.whosoff-group-name{font-size:10.5px;color:#888;}
+td.cal-cell-jump-flash-blue{outline:3px solid var(--whosoff) !important;outline-offset:-3px;}
+

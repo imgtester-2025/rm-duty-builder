@@ -1,0 +1,17 @@
+/* ---------- Annual Leave / Absence page ---------- */
+.absence-tab{background:none;border:none;padding:10px 16px;font-size:13px;font-weight:700;color:var(--ink-muted);cursor:pointer;
+  border-bottom:2px solid transparent;transition:color .1s;}
+.absence-tab:hover{color:var(--ink);}
+.absence-tab.active{color:var(--rm-red-dark);border-bottom-color:var(--rm-red);}
+.absence-pane{display:none;}
+.absence-pane.active{display:block;}
+#otherAbsenceEmployeeSearch{width:100%;max-width:320px;padding:8px 10px;margin:10px 0 12px;font-size:13px;}
+.absence-add-inline{display:none;align-items:center;gap:6px;margin-top:8px;flex-wrap:wrap;}
+.absence-add-inline.open{display:flex;}
+.absence-add-inline select, .absence-add-inline input[type=text]{padding:6px 8px;font-size:12px;}
+.absence-add-inline input[type=date]{padding:6px 8px;font-size:12px;}
+.absence-entry-chip{display:flex;align-items:center;gap:6px;background:var(--paper);border:1px solid var(--border);
+  border-radius:var(--radius-sm);padding:5px 9px;font-size:12px;}
+.absence-entry-chip.type-sick{border-color:#eab8b8;background:#fdf1f0;}
+.absence-entry-chip.type-other{border-color:var(--border-strong);background:var(--paper);}
+
