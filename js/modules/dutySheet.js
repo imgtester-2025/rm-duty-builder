@@ -916,6 +916,30 @@ function wireCellOverrideModal(){
   });
 }
 
-/* ---------------------------------------------------------------
-   GLOBAL WIRING: employees/duties admin, imports, groups
-   --------------------------------------------------------------- */
+// The "click a red gap-count badge to see what's uncovered" modal - shared
+// by BOTH the Duty Sheet's own per-group status header (core, above) and
+// the Rota Sheet's status header (optional, modules/rotaSheet.js). Wired
+// here, unconditionally, rather than inside wireRotaSheetPage(), so it
+// keeps working on the core Duty Sheet even when the optional Rota Sheet
+// module is switched off.
+function wireCoreGapsModal(){
+  document.addEventListener('click', e => {
+    const btn = e.target.closest('[data-core-gaps-date]');
+    if (!btn) return;
+    const dateISO = btn.dataset.coreGapsDate;
+    const groupFilter = btn.dataset.coreGapsGroup ? new Set([Number(btn.dataset.coreGapsGroup)]) : null;
+    const gaps = computeCoreDutyGapsForDate(dateISO, groupFilter);
+    document.getElementById('coreGapsModalTitle').textContent =
+      'Uncovered core duties – ' + fmtShort(parseISO(dateISO));
+    document.getElementById('coreGapsModalContent').innerHTML = gaps.length
+      ? `<ul class="core-gaps-list">${gaps.map(g => `<li>
+          <strong>${escapeHtml(g.dutyLabel)}</strong> <span class="rota-reason">${escapeHtml(g.groupName)} · ${escapeHtml(g.role)}</span>
+          <div>${g.empName ? escapeHtml(g.empName) + ' – ' : ''}${escapeHtml(g.reason)}</div>
+        </li>`).join('')}</ul>`
+      : '<p class="rota-empty-note">All core duties covered.</p>';
+    document.getElementById('coreGapsModal').classList.add('open');
+  });
+  document.getElementById('coreGapsModalCloseBtn').addEventListener('click', () => {
+    document.getElementById('coreGapsModal').classList.remove('open');
+  });
+}

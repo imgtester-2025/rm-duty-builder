@@ -6,7 +6,13 @@
 .cal-controls input{padding:6px 8px;font-size:13px;}
 
 table.cal-table{border-collapse:collapse;width:100%;margin-bottom:20px;background:var(--card);
-  border:1px solid var(--border);border-radius:var(--radius-md);font-size:12px;overflow:hidden;box-shadow:var(--shadow-xs);}
+  border:1px solid var(--border);border-radius:var(--radius-md);font-size:12px;box-shadow:var(--shadow-xs);}
+/* NOTE: no `overflow:hidden` here on purpose - it would clip the table to
+   round its corners, but that also breaks `position:sticky` on the caption
+   and thead below (an overflow other than visible on an ancestor stops a
+   sticky descendant from sticking to the viewport). The rotation-week
+   caption and the Mon-Sun header row staying fixed while the calendar body
+   scrolls depends on this table NOT clipping its own overflow. */
 table.cal-table caption{text-align:left;font-weight:700;font-size:14px;padding:11px 14px;background:var(--rm-red-soft);color:var(--rm-red-dark);caption-side:top;
   position:sticky;top:var(--sticky-bar-h,0px);z-index:32;}
 table.cal-table th, table.cal-table td{border:1px solid var(--border);padding:4px 6px;text-align:center;}

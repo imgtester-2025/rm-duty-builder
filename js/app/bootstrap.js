@@ -63,6 +63,7 @@ function bootWithBytes(dbBytes){
   wireBackupControls();
   wireSettingsPage();
   wireCellOverrideModal();
+  wireCoreGapsModal();
   wireLockControls();
 
   // OPTIONAL - each gated on its own ModuleRegistry entry. When a module is
